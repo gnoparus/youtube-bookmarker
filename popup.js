@@ -1,8 +1,20 @@
-import { getActiveTabURL } from "./utils";
+import { getActiveTabURL } from "./utils.js";
 
-const addNewBookmark = () => {};
+const addNewBookmark = (bookmarksElement, bookmark) => {};
 
-const viewBookmarks = () => {};
+const viewBookmarks = (currentVideoBookmarks = []) => {
+  const bookmarksElement = document.getElementById("bookmarks");
+  bookmarksElement.innerHTML = "";
+
+  if (currentVideoBookmarks.length > 0) {
+    for (i = 0; i < currentVideoBookmarks.length; i++) {
+      const bookmark = currentVideoBookmarks[i];
+      addNewBookmark(bookmarksElement, bookmark);
+    }
+  } else {
+    bookmarksElement.innerHTML = "<i class='row'>No bookmarks 55555</i>";
+  }
+};
 
 const onPlay = () => {};
 
@@ -18,12 +30,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const currentVideo = urlParameters.get("v");
 
   if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+    console.log("popup.js youtube watch ++++++++++++++++++++++++");
     chrome.storage.sync.get([currentVideo], (data) => {
       const currentVideoBookmarks = data[currentVideo]
         ? JSON.parse(data[currentVideo])
         : [];
+      // viewBookmarks
+      viewBookmarks(currentVideoBookmarks);
     });
-
-    // viewBookmarks
+  } else {
+    console.log("else++++++++++++++++++++++++");
+    const container = document.getElementsByClassName("container")[0];
+    container.innerHTML =
+      '<div class="title">This is not a youtube video page 5555.</div>';
   }
 });
