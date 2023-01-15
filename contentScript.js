@@ -3,7 +3,7 @@
   let currentVideo = "";
   let currentVideoBookmarks = [];
 
-  chrome.runtime.onMessage.addListener((obj, sender, response) => {
+  chrome.runtime.onMessage.addListener(async (obj, sender, response) => {
     const { type, value, videoId } = obj;
 
     if (type === "NEW") {
@@ -12,6 +12,20 @@
         "in contentScript.js videoId: " + videoId + ", type: " + type
       );
       newVideoLoaded();
+    } else if (type === "PLAY") {
+      youtubePlayer.currentTime = value;
+    } else if (type === "DELETE") {
+      currentVideoBookmarks = await fetchBookmarks();
+      currentVideoBookmarks = currentVideoBookmarks.filter(
+        (b) => b.time != value
+      );
+      console.log("Delete so update storage with" + currentVideo);
+      console.log(currentVideoBookmarks);
+
+      chrome.storage.sync.set({
+        [currentVideo]: JSON.stringify(currentVideoBookmarks),
+      });
+      response(currentVideoBookmarks);
     }
   });
 
@@ -56,12 +70,12 @@
     console.log(newBookmark);
 
     currentVideoBookmarks = await fetchBookmarks();
+    console.log("currentVideoBookmarks : ");
+    console.log(currentVideoBookmarks);
 
     chrome.storage.sync.set({
       [currentVideo]: JSON.stringify(
-        [...currentVideoBookmarks, newBookmark].sort((a, b) => {
-          a.time - b.time;
-        })
+        [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)
       ),
     });
   };
